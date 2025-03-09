@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Form</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        form { margin-bottom: 20px; }
+        input, button { margin: 10px; padding: 8px; width: 200px; }
+        .product-card { border: 1px solid #ddd; padding: 10px; margin: 10px; display: inline-block; width: 200px; }
+    </style>
+</head>
+<body>
+
+    <h2>Add Product</h2>
+    <form id="productForm">
+        <input type="text" id="name" placeholder="Product Name" required><br>
+        <input type="text" id="description" placeholder="Description" required><br>
+        <input type="number" id="price" placeholder="Price" required><br>
+        <input type="number" id="quantity" placeholder="Quantity" required><br>
+        <button type="submit">Add Product</button>
+    </form>
+
+    <h2>Product List</h2>
+    <div id="productContainer"></div>
+
+    <script>
+        const form = document.getElementById("productForm");
+        const container = document.getElementById("productContainer");
+        let products = [];
+
+        form.addEventListener("submit", function(e) {
+            e.preventDefault();
+            const name = document.getElementById("name").value;
+            const desc = document.getElementById("description").value;
+            const price = document.getElementById("price").value;
+            const quantity = document.getElementById("quantity").value;
+            if (!name || !desc || !price || !quantity) return alert("املأ جميع Filll!");
+
+            products.push({ name, desc, price, quantity });
+            displayProducts(); 
+            form.reset();
+        });
+
+        function displayProducts() {
+            container.innerHTML = ""; 
+            products.forEach(p => {
+                container.innerHTML += `
+                    <div class="product-card">
+                        <h3>${p.name}</h3>
+                        <p>${p.desc}</p>
+                        <p><strong>Price:</strong> $${p.price}</p>
+                        <p><strong>Quantity:</strong> ${p.quantity}</p>
+                    </div>`;
+            });
+        }
+    </script>
+
+</body>
+</html>
