@@ -25,36 +25,75 @@
     <h2>Product List</h2>
     <div id="productContainer"></div>
 
-    <script>
-        const form = document.getElementById("productForm");
-        const container = document.getElementById("productContainer");
-        let products = [];
+    <script type="module">
+        // تعريف الواجهة الخاصة بالمنتج
+        interface Product {
+            name: string;
+            description: string;
+            price: number;
+            quantity: number;
+        }
 
-        form.addEventListener("submit", function(e) {
-            e.preventDefault();
-            const name = document.getElementById("name").value;
-            const desc = document.getElementById("description").value;
-            const price = document.getElementById("price").value;
-            const quantity = document.getElementById("quantity").value;
-            if (!name || !desc || !price || !quantity) return alert("املأ جميع Filll!");
+        const form = document.getElementById("productForm") as HTMLFormElement;
+        const container = document.getElementById("productContainer") as HTMLElement;
 
-            products.push({ name, desc, price, quantity });
-            displayProducts(); 
-            form.reset();
-        });
+        // استرجاع المنتجات من localStorage إذا كانت موجودة
+        function loadProducts() {
+            const savedProducts = localStorage.getItem("products");
+            if (savedProducts) {
+                return JSON.parse(savedProducts) as Product[];
+            }
+            return [];
+        }
 
-        function displayProducts() {
-            container.innerHTML = ""; 
-            products.forEach(p => {
+        // عرض المنتجات
+        function displayProducts(products: Product[]) {
+            container.innerHTML = ""; // مسح المنتجات القديمة
+            products.forEach(product => {
                 container.innerHTML += `
                     <div class="product-card">
-                        <h3>${p.name}</h3>
-                        <p>${p.desc}</p>
-                        <p><strong>Price:</strong> $${p.price}</p>
-                        <p><strong>Quantity:</strong> ${p.quantity}</p>
+                        <h3>${product.name}</h3>
+                        <p>${product.description}</p>
+                        <p><strong>Price:</strong> $${product.price}</p>
+                        <p><strong>Quantity:</strong> ${product.quantity}</p>
                     </div>`;
             });
         }
+
+        // عند تقديم النموذج
+        form.addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            const name = (document.getElementById("name") as HTMLInputElement).value;
+            const description = (document.getElementById("description") as HTMLInputElement).value;
+            const price = parseFloat((document.getElementById("price") as HTMLInputElement).value);
+            const quantity = parseInt((document.getElementById("quantity") as HTMLInputElement).value);
+
+            if (!name || !description || isNaN(price) || isNaN(quantity)) {
+                alert("املأ جميع الحقول بشكل صحيح!");
+                return;
+            }
+
+            // إضافة المنتج للمصفوفة
+            const newProduct: Product = { name, description, price, quantity };
+
+            // استرجاع المنتجات الحالية من localStorage
+            const products = loadProducts();
+
+            // إضافة المنتج الجديد للمصفوفة
+            products.push(newProduct);
+
+            // تخزين المنتجات في localStorage
+            localStorage.setItem("products", JSON.stringify(products));
+
+            // إعادة تعيين النموذج وعرض المنتجات
+            form.reset();
+            displayProducts(products);
+        });
+
+        // تحميل وعرض المنتجات عند تحميل الصفحة
+        const products = loadProducts();
+        displayProducts(products);
     </script>
 
 </body>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>University Library To-Do List</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    .container {
+      width: 80%;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    input, select, button {
+      margin: 10px 0;
+      padding: 10px;
+      width: 300px;
+    }
+
+    button {
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #taskList {
+      margin-top: 20px;
+    }
+
+    .taskItem {
+      display: flex;
+      justify-content: space-between;
+      background-color: #f9f9f9;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 5px;
+    }
+
+    .taskItem button {
+      background-color: red;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .taskItem button:hover {
+      background-color: darkred;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>University Library To-Do List</h1>
+    
+    <!-- Task Form -->
+    <form id="taskForm">
+      <input type="text" id="taskTitle" placeholder="Enter Task Title" required />
+      <input type="date" id="taskStartDate" />
+      <input type="date" id="taskEndDate" />
+      <select id="taskState">
+        <option value="pending">Pending</option>
+        <option value="in-progress">In Progress</option>
+        <option value="completed">Completed</option>
+      </select>
+      <button type="submit">Add Task</button>
+    </form>
+
+    <!-- Task List -->
+    <div id="taskList"></div>
+  </div>
+
+  <script>
+    // Task Interface
+    interface Task {
+      id: number;
+      title: string;
+      states: string;
+      startDate: string;
+      endDate: string;
+    }
+
+    // Get the task list from localStorage, or initialize an empty array if not available
+    const tasks: Task[] = JSON.parse(localStorage.getItem('tasks') || '[]');
+
+    // DOM references
+    const taskForm = document.getElementById('taskForm') as HTMLFormElement;
+    const taskTitle = document.getElementById('taskTitle') as HTMLInputElement;
+    const taskStartDate = document.getElementById('taskStartDate') as HTMLInputElement;
+    const taskEndDate = document.getElementById('taskEndDate') as HTMLInputElement;
+    const taskState = document.getElementById('taskState') as HTMLSelectElement;
+    const taskList = document.getElementById('taskList') as HTMLDivElement;
+
+    // Load tasks from localStorage and display them
+    window.onload = function () {
+      tasks.forEach((task) => {
+        displayTask(task);
+      });
+    };
+
+    // Function to display a task
+    function displayTask(task: Task): void {
+      const taskDiv = document.createElement('div');
+      taskDiv.classList.add('taskItem');
+      taskDiv.innerHTML = `
+        <div>
+          <strong>${task.title}</strong> (${task.states})
+          <br>
+          ${task.startDate} - ${task.endDate}
+        </div>
+        <div>
+          <button onclick="deleteTask(${task.id})">Delete</button>
+        </div>
+      `;
+      taskList.appendChild(taskDiv);
+    }
+
+    // Function to save tasks to localStorage
+    function saveTasks(): void {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    // Event listener for adding a new task
+    taskForm.addEventListener('submit', function (e: Event): void {
+      e.preventDefault();
+
+      const title = taskTitle.value.trim();
+      const startDate = taskStartDate.value;
+      const endDate = taskEndDate.value;
+      const state = taskState.value;
+
+      // Validate the input fields
+      if (title === '') {
+        alert('Task title cannot be empty!');
+        return;
+      }
+
+      const taskId = Date.now(); // Generate a unique ID based on timestamp
+      const newTask: Task = {
+        id: taskId,
+        title: title,
+        states: state,
+        startDate: startDate,
+        endDate: endDate,
+      };
+
+      // Add the new task to the tasks array
+      tasks.push(newTask);
+
+      // Display the new task
+      displayTask(newTask);
+
+      // Save the updated tasks array to localStorage
+      saveTasks();
+
+      // Clear the form
+      taskForm.reset();
+    });
+
+    // Function to delete a task
+    function deleteTask(id: number): void {
+      // Find the index of the task to delete
+      const taskIndex = tasks.findIndex((task) => task.id === id);
+      if (taskIndex !== -1) {
+        // Remove the task from the array
+        tasks.splice(taskIndex, 1);
+      }
+
+      // Save the updated tasks array to localStorage
+      saveTasks();
+
+      // Reload the tasks in the DOM
+      taskList.innerHTML = '';
+      tasks.forEach((task) => {
+        displayTask(task);
+      });
+    }
+  </script>
+</body>
+</html>
